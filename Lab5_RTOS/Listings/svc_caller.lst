@@ -1,0 +1,112 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000                 AREA             handle_pend,CODE,READONLY
+    2 00000000                 EXTERN           task_switch
+    3 00000000                 GLOBAL           PendSV_Handler
+    4 00000000                 GLOBAL           push_LR
+    5 00000000                 PRESERVE8
+    6 00000000         PendSV_Handler
+    7 00000000         
+    8 00000000 F3EF 8009       MRS              r0,PSP
+    9 00000004         ;LDR LR,[r0] ;reload LR
+   10 00000004         ;now store the registers
+   11 00000004         ;STMDB r0!,{r4-r11}
+   12 00000004 E920 0FF0       STMDB            r0!,{r4-r11}
+   13 00000008         ;STR LR,[r0]
+   14 00000008         ;call kernel task switch
+   15 00000008 F7FF FFFE       BL               task_switch
+   16 0000000C         
+   17 0000000C         ;OK, for setup purposes, r0 contains the number of threa
+                       ds. If this is 0 or 1, we need to do special things
+   18 0000000C B140            CBZ              r0, noThreadsRunning
+   19 0000000E         
+   20 0000000E F3EF 8009       MRS              r0,PSP      ;this is the new ta
+                                                            sk stack
+   21 00000012 F06F 0E02       MOV              LR,#0xFFFFFFFD
+   22 00000016         ;LDR LR,[r0,#24]
+   23 00000016         ;get all of the registers out
+   24 00000016 E8B0 0FF0       LDMIA            r0!,{r4-r11}
+   25 0000001A F380 8809       MSR              PSP,r0
+   26 0000001E         ;return?
+   27 0000001E 4770            BX               LR
+   28 00000020         noThreadsRunning
+   29 00000020 F3EF 8009       MRS              r0,PSP      ;figure out where t
+                                                            he stack is
+   30 00000024         ;LDR LR,[r0,#24] ;reload LR
+   31 00000024 F06F 0E02       MOV              LR,#0xFFFFFFFD
+   32 00000028         ;LDR PC,[r0] ;set PC to rock back to thread mode
+   33 00000028 4770            BX               LR          ;go back
+   34 0000002A         
+   35 0000002A         push_LR
+   36 0000002A B500            PUSH             {LR}
+   37 0000002C 4770            BX               LR          ;a simple function 
+                                                            because inline asse
+                                                            mbly can't do this
+   38 0000002E         
+   39 0000002E                 END
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M3 --apcs=interw
+ork --depend=.\objects\svc_caller.d -o.\objects\svc_caller.o -I.\RTE\Device\LPC
+1768 -I.\RTE\_Target_1 -IC:\Users\tienb\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0
+\CMSIS\Core\Include -IC:\Users\tienb\AppData\Local\Arm\Packs\Keil\LPC1700_DFP\2
+.7.1\Device\Include --predefine="__EVAL SETA 1" --predefine="__UVISION_VERSION 
+SETA 536" --predefine="_RTE_ SETA 1" --predefine="LPC175x_6x SETA 1" --predefin
+e="_RTE_ SETA 1" --list=.\listings\svc_caller.lst svc_caller.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+PendSV_Handler 00000000
+
+Symbol: PendSV_Handler
+   Definitions
+      At line 6 in file svc_caller.s
+   Uses
+      At line 3 in file svc_caller.s
+Comment: PendSV_Handler used once
+handle_pend 00000000
+
+Symbol: handle_pend
+   Definitions
+      At line 1 in file svc_caller.s
+   Uses
+      None
+Comment: handle_pend unused
+noThreadsRunning 00000020
+
+Symbol: noThreadsRunning
+   Definitions
+      At line 28 in file svc_caller.s
+   Uses
+      At line 18 in file svc_caller.s
+Comment: noThreadsRunning used once
+push_LR 0000002A
+
+Symbol: push_LR
+   Definitions
+      At line 35 in file svc_caller.s
+   Uses
+      At line 4 in file svc_caller.s
+Comment: push_LR used once
+4 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+task_switch 00000000
+
+Symbol: task_switch
+   Definitions
+      At line 2 in file svc_caller.s
+   Uses
+      At line 15 in file svc_caller.s
+Comment: task_switch used once
+1 symbol
+339 symbols in table
